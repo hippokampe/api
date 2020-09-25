@@ -55,6 +55,7 @@ func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, 
 	selector := "#user_preferred_name"
 	h.collector.OnHTML(selector, func(div *colly.HTMLElement) {
 		user.Username = strings.Trim(div.Attr("value"), "\t\n ")
+		h.InternalStatus.Logged = true
 		exists = true
 	})
 

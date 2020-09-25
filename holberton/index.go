@@ -20,12 +20,19 @@ const (
 )
 
 type Holberton struct {
-	pw        *playwright.Playwright
-	browser   *playwright.Browser
-	ts        *httptest.Server
-	mux       *http.ServeMux
-	collector *colly.Collector
-	page      *playwright.Page
+	pw             *playwright.Playwright
+	browser        *playwright.Browser
+	ts             *httptest.Server
+	mux            *http.ServeMux
+	collector      *colly.Collector
+	page           *playwright.Page
+	InternalStatus status
+}
+
+type status struct {
+	Logged      bool
+	VisitedURLS map[string]bool
+	Started     bool
 }
 
 func NewSession(browserName string) (*Holberton, error) {

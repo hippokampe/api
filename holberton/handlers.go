@@ -19,6 +19,10 @@ func (h *Holberton) StartPage() error {
 	}
 
 	h.newServer()
+
+	h.InternalStatus.VisitedURLS = make(map[string]bool)
+	h.InternalStatus.Logged = false
+
 	return nil
 }
 
