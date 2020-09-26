@@ -49,7 +49,18 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 			return
 		}
 
-		newUser, _ := h.Login(user.Email, user.Password)
+		newUser, err := h.Login(user.Email, user.Password)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if newUser == nil {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": "user email or user password is incorrect",
+			})
+			return
+		}
 
 		ctx.JSON(http.StatusOK, gin.H{"username": newUser.Username})
 	}
