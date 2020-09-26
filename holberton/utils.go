@@ -5,19 +5,18 @@ import (
 	"github.com/gocolly/colly"
 	"net/http"
 	"net/http/httptest"
+	"time"
 )
 
-func (h *Holberton) setHtml(html, path string) {
-	if _, ok := h.InternalStatus.VisitedURLS[path]; ok {
-		fmt.Println("You can't go again to " + path)
-		return
-	}
-
-	h.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+func (h *Holberton) setHtml(html, path string) string {
+	newPath := fmt.Sprintf("%s%d", path, time.Now().UnixNano())
+	fmt.Println(newPath)
+	h.mux.HandleFunc(newPath, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(html))
 	})
-	h.InternalStatus.VisitedURLS[path] = true
+
+	return h.ts.URL + newPath
 }
 
 func (h *Holberton) newServer() {
@@ -25,3 +24,4 @@ func (h *Holberton) newServer() {
 	h.ts = httptest.NewServer(h.mux)
 	h.collector = colly.NewCollector()
 }
+
