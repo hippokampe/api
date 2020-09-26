@@ -29,7 +29,14 @@ func checkTask(h *holberton.Holberton) gin.HandlerFunc {
 		id := ctx.Param("id")
 		taskID := ctx.Param("task")
 
-		h.CheckTask(id, taskID)
+		task, err := h.CheckTask(id, taskID)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+
+		ctx.JSON(http.StatusOK, task)
 	}
 }
 
