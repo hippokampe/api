@@ -27,7 +27,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 	}
 
 	html, _ := h.page.Content()
-	h.setHtml(html, localURL)
+	url := h.setHtml(html, localURL)
 
 	h.collector.OnHTML("article", func(article *colly.HTMLElement) {
 		if visited {
@@ -56,17 +56,8 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 			value, _ := task.Attr("data-role")
 			taskID := value[4:]
 
-			h4 := task.Find("h4.task")
-			span := task.Find("h4 > span")
-
-			title := strings.Replace(h4.Text(), span.Text(), "", 1)
-			title = strings.Trim(title, "\t\n ")
-			class := strings.Trim(span.Text(), "\t\n ")
-
-			if class[0] == '#' { //Ex, #advanced to advanced
-				class = class[1:]
-			}
-
+			h4, span := searchTitleTask(task)
+			title, class := parseTitleTask(h4, span)
 			project.Tasks = append(project.Tasks, models.Task{
 				ID: taskID,
 				Title: title,
@@ -77,7 +68,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		visited = true
 	})
 
-	h.collector.Visit(h.ts.URL + localURL)
+	h.collector.Visit(url)
 
 	return project, nil
 }

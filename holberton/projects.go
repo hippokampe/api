@@ -20,7 +20,7 @@ func (h *Holberton) projects() (models.Projects, error) {
 	}
 
 	html, _ := h.page.Content()
-	h.setHtml(html, "/projects")
+	url := h.setHtml(html, "/projects")
 
 	h.collector.OnHTML("body > main > article", func(element *colly.HTMLElement) {
 		selector := "div.panel.panel-default"
@@ -44,7 +44,7 @@ func (h *Holberton) projects() (models.Projects, error) {
 		})
 	})
 
-	h.collector.Visit(h.ts.URL + "/projects")
+	h.collector.Visit(url)
 
 	return projects, nil
 }

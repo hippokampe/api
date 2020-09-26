@@ -50,7 +50,7 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, error) {
 	exists := false
 	html, _ := page.Content()
-	h.setHtml(html, "/login")
+	url := h.setHtml(html, "/login")
 
 	selector := "#user_preferred_name"
 	h.collector.OnHTML(selector, func(div *colly.HTMLElement) {
@@ -59,7 +59,7 @@ func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, 
 		exists = true
 	})
 
-	h.collector.Visit(h.ts.URL + "/login")
+	h.collector.Visit(url)
 
 	if !exists {
 		return exists, logger.New("bad credentials")
