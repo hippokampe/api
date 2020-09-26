@@ -1,12 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
-	"strings"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"holberton/api/app/models"
+	"holberton/api/logger"
 )
 
 func (h *Holberton) project(id string) (*models.Project, error) {
@@ -35,7 +33,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		}
 
 		categoryP := article.DOM.Find("body > main > article > p.sm-gap")
-		categoryTitle := strings.Trim(categoryP.Text(), "\t\n ")
+		categoryTitle := cleanString(categoryP.Text())
 		project.Category = categoryTitle
 
 		projectTitle := article.DOM.Find("h1.gap")

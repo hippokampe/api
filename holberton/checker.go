@@ -75,7 +75,6 @@ func (h *Holberton) checker(url, taskId string) *models.ResultChecker {
 	c2.OnHTML(selector, func(element *colly.HTMLElement) {
 		var checks []models.Check
 
-
 		h4 := element.DOM.Find("h4")
 		fmt.Println(h4.Text())
 
