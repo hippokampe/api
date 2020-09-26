@@ -1,12 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
-	"strings"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"holberton/api/app/models"
+	"holberton/api/logger"
 )
 
 func (h *Holberton) project(id string) (*models.Project, error) {
@@ -27,7 +25,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 	}
 
 	html, _ := h.page.Content()
-	h.setHtml(html, localURL)
+	url := h.setHtml(html, localURL)
 
 	h.collector.OnHTML("article", func(article *colly.HTMLElement) {
 		if visited {
@@ -35,7 +33,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		}
 
 		categoryP := article.DOM.Find("body > main > article > p.sm-gap")
-		categoryTitle := strings.Trim(categoryP.Text(), "\t\n ")
+		categoryTitle := cleanString(categoryP.Text())
 		project.Category = categoryTitle
 
 		projectTitle := article.DOM.Find("h1.gap")
@@ -56,28 +54,19 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 			value, _ := task.Attr("data-role")
 			taskID := value[4:]
 
-			h4 := task.Find("h4.task")
-			span := task.Find("h4 > span")
-
-			title := strings.Replace(h4.Text(), span.Text(), "", 1)
-			title = strings.Trim(title, "\t\n ")
-			class := strings.Trim(span.Text(), "\t\n ")
-
-			if class[0] == '#' { //Ex, #advanced to advanced
-				class = class[1:]
-			}
-
+			h4, span := searchTitleTask(task)
+			title, class := parseTitleTask(h4, span)
 			project.Tasks = append(project.Tasks, models.Task{
-				ID: taskID,
+				ID:    taskID,
 				Title: title,
-				Type: class,
+				Type:  class,
 			})
 		})
 
 		visited = true
 	})
 
-	h.collector.Visit(h.ts.URL + localURL)
+	h.collector.Visit(url)
 
 	return project, nil
 }

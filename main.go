@@ -35,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	api.New(":5000", *hbtn)
+	api.New(":5000", hbtn)
 
 	hbtn.CloseSession()
 }

@@ -1,13 +1,12 @@
 package models
 
 type ResultChecker struct {
-	ID     string  `json:"id"`
-	Checks []Check `json:"checks"`
+	Checks []Check `json:"checks,omitempty"`
 }
 
 type Check struct {
-	ID     string `json:"id"`
-	Title  string `json:"title"`
-	Type   string `json:"type"`
-	Status string `json:"status"`
+	ID       string `json:"id,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Status   bool   `json:"status,omitempty"`
+	Position int    `json:"position"`
 }

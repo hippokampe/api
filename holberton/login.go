@@ -1,12 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
-	"strings"
-
 	"github.com/gocolly/colly"
 	"github.com/mxschmitt/playwright-go"
+	"holberton/api/app/models"
+	"holberton/api/logger"
 )
 
 func (h *Holberton) login(email, password string) (*models.User, error) {
@@ -50,15 +48,17 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, error) {
 	exists := false
 	html, _ := page.Content()
-	h.setHtml(html, "/login")
+	url := h.setHtml(html, "/login")
 
 	selector := "#user_preferred_name"
 	h.collector.OnHTML(selector, func(div *colly.HTMLElement) {
-		user.Username = strings.Trim(div.Attr("value"), "\t\n ")
+		user.Username = cleanString(div.Attr("value"))
+
+		h.InternalStatus.Logged = true
 		exists = true
 	})
 
-	h.collector.Visit(h.ts.URL + "/login")
+	h.collector.Visit(url)
 
 	if !exists {
 		return exists, logger.New("bad credentials")

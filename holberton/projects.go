@@ -1,12 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
-	"strings"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	"holberton/api/app/models"
+	"holberton/api/logger"
 )
 
 func (h *Holberton) projects() (models.Projects, error) {
@@ -20,13 +18,13 @@ func (h *Holberton) projects() (models.Projects, error) {
 	}
 
 	html, _ := h.page.Content()
-	h.setHtml(html, "/projects")
+	url := h.setHtml(html, "/projects")
 
 	h.collector.OnHTML("body > main > article", func(element *colly.HTMLElement) {
 		selector := "div.panel.panel-default"
 		element.ForEach(selector, func(_ int, e *colly.HTMLElement) {
 			h4 := e.DOM.Find("h4.panel-title")
-			title := strings.Trim(h4.Text(), "\n\t ")
+			title := cleanString(h4.Text())
 
 			projectsList := e.DOM.Find("li.list-group-item")
 			projectsList.Each(func(_ int, project *goquery.Selection) {
@@ -44,7 +42,7 @@ func (h *Holberton) projects() (models.Projects, error) {
 		})
 	})
 
-	h.collector.Visit(h.ts.URL + "/projects")
+	h.collector.Visit(url)
 
 	return projects, nil
 }

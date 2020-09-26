@@ -1,0 +1,68 @@
+package api
+
+import (
+	"github.com/gin-gonic/gin"
+	"holberton/api/app/models"
+	"holberton/api/holberton"
+	"net/http"
+)
+
+func getProjects(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		projects, _ := h.GetProjects()
+		ctx.JSON(http.StatusOK, projects)
+	}
+}
+
+func getProject(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := ctx.Param("id")
+
+		project, _ := h.GetProject(id)
+
+		ctx.JSON(http.StatusOK, project)
+	}
+}
+
+func checkTask(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		taskID := ctx.Param("task")
+
+		task, err := h.CheckTask(id, taskID)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+
+		ctx.JSON(http.StatusOK, task)
+	}
+}
+
+func login(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var user models.User
+
+		if err := ctx.ShouldBindJSON(&user); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		newUser, _ := h.Login(user.Email, user.Password)
+
+		ctx.JSON(http.StatusOK, gin.H{"username": newUser.Username})
+	}
+}
+
+func status(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		h.StartPage()
+
+		h.InternalStatus.Started = true
+
+		ctx.JSON(200, gin.H{
+			"status": "online",
+		})
+	}
+}
