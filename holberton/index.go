@@ -1,10 +1,11 @@
 package holberton
 
 import (
-	"github.com/gocolly/colly"
 	"holberton/api/logger"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gocolly/colly"
 
 	"github.com/mxschmitt/playwright-go"
 )
