@@ -8,14 +8,14 @@ import (
 )
 
 func getProjects(h *holberton.Holberton) gin.HandlerFunc {
-	return func (ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		projects, _ := h.GetProjects()
 		ctx.JSON(http.StatusOK, projects)
 	}
 }
 
 func getProject(h *holberton.Holberton) gin.HandlerFunc {
-	return func (ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
 		project, _ := h.GetProject(id)
@@ -25,7 +25,7 @@ func getProject(h *holberton.Holberton) gin.HandlerFunc {
 }
 
 func checkTask(h *holberton.Holberton) gin.HandlerFunc {
-	return func (ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		taskID := ctx.Param("task")
 
@@ -41,7 +41,7 @@ func checkTask(h *holberton.Holberton) gin.HandlerFunc {
 }
 
 func login(h *holberton.Holberton) gin.HandlerFunc {
-	return func (ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		var user models.User
 
 		if err := ctx.ShouldBindJSON(&user); err != nil {

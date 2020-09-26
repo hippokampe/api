@@ -86,9 +86,9 @@ func (h *Holberton) checker(url, taskId string) *models.ResultChecker {
 			typeCheck, status := parseCheck(title)
 
 			checks = append(checks, models.Check{
-				ID: checkID,
-				Type: typeCheck,
-				Status: status,
+				ID:       checkID,
+				Type:     typeCheck,
+				Status:   status,
 				Position: i,
 			})
 		})

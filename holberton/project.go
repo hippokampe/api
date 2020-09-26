@@ -57,9 +57,9 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 			h4, span := searchTitleTask(task)
 			title, class := parseTitleTask(h4, span)
 			project.Tasks = append(project.Tasks, models.Task{
-				ID: taskID,
+				ID:    taskID,
 				Title: title,
-				Type: class,
+				Type:  class,
 			})
 		})
 
