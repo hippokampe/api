@@ -19,6 +19,12 @@ func getProject(h *holberton.Holberton) gin.HandlerFunc {
 		id := ctx.Param("id")
 
 		project, _ := h.GetProject(id)
+		if project == nil {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": "project not found",
+			})
+			return
+		}
 
 		ctx.JSON(http.StatusOK, project)
 	}
