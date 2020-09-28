@@ -53,8 +53,8 @@ func parseTitleTask(h4, span *goquery.Selection) (title, class string) {
 func parseCheck(title string) (typeCheck string, status bool) {
 	title = strings.ToLower(title)
 
-	checkType, status := parseCheckTitle(title)
-	switch checkType {
+	typeCheck, status = parseCheckTitle(title)
+	switch typeCheck {
 	case "correct output of your code":
 		return "output code", status
 	case "requirement":
@@ -68,16 +68,11 @@ func parseCheck(title string) (typeCheck string, status bool) {
 	return "unknown", false
 }
 
-func parseCheckTitle(title string) (typeCheck string, status bool) {
+func parseCheckTitle(title string) (string, bool) {
 	parts := strings.Split(title, "-")
 
-	typeCheck = cleanString(parts[0])
+	typeCheck := cleanString(parts[0])
 	statusLiteral := cleanString(parts[1])
 
-	status = false
-	if statusLiteral == "success" {
-		status = true
-	}
-
-	return typeCheck, status
+	return typeCheck, statusLiteral == "success"
 }
