@@ -68,5 +68,9 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 
 	h.collector.Visit(url)
 
+	if project.Title == ""{
+		return nil, nil
+	}
+
 	return project, nil
 }

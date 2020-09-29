@@ -43,7 +43,6 @@ func NewSession(browserName string) (*Holberton, error) {
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
 		Headless:       playwright.Bool(true),
-		ExecutablePath: playwright.String("/home/davixcky/.config/hbtn/firefox-1173/firefox/firefox"),
 	}
 
 	holberton.pw, err = playwright.Run()

@@ -40,9 +40,17 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 
 	_, err = h.page.Goto("https://intranet.hbtn.io/users/my_profile")
 
-	h.userExists(h.page, user)
+	exists, err := h.userExists(h.page, user)
+	if err != nil {
+		logger.Log2(err, "cannot check if user exists")
+		return nil, err
+	}
 
-	return user, nil
+	if exists {
+		return user, err
+	}
+
+	return nil, nil
 }
 
 func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, error) {
@@ -60,9 +68,5 @@ func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, 
 
 	h.collector.Visit(url)
 
-	if !exists {
-		return exists, logger.New("bad credentials")
-	}
-
-	return true, nil
+	return exists, nil
 }
