@@ -50,6 +50,11 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user models.User
 
+		if h.InternalStatus.Logged {
+			ctx.JSON(http.StatusOK, gin.H{"username": h.InternalStatus.Username})
+			return
+		}
+
 		if err := ctx.ShouldBindJSON(&user); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -68,6 +73,7 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 			return
 		}
 
+		h.InternalStatus.Username = newUser.Username
 		ctx.JSON(http.StatusOK, gin.H{"username": newUser.Username})
 	}
 }
