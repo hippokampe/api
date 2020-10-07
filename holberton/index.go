@@ -1,9 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/logger"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/hippokampe/api/logger"
 
 	"github.com/gocolly/colly"
 

@@ -2,12 +2,13 @@ package holberton
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/gocolly/colly"
 )
 
 func (h *Holberton) setHtml(html, path string) string {

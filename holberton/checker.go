@@ -2,8 +2,9 @@ package holberton
 
 import (
 	"fmt"
-	"holberton/api/app/models"
-	"holberton/api/logger"
+
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 
 	"github.com/PuerkitoBio/goquery"
 

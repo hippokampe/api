@@ -3,8 +3,8 @@ package holberton
 import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"holberton/api/app/models"
-	"holberton/api/logger"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 )
 
 func (h *Holberton) project(id string) (*models.Project, error) {
@@ -68,7 +68,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 
 	h.collector.Visit(url)
 
-	if project.Title == ""{
+	if project.Title == "" {
 		return nil, nil
 	}
 

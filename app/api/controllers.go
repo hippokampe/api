@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"holberton/api/app/models"
-	"holberton/api/holberton"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/holberton"
 )
 
 func getProjects(h *holberton.Holberton) gin.HandlerFunc {

@@ -3,8 +3,8 @@ package holberton
 import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"holberton/api/app/models"
-	"holberton/api/logger"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 )
 
 func (h *Holberton) projects() (models.Projects, error) {

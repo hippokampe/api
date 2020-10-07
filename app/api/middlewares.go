@@ -1,9 +1,10 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"holberton/api/holberton"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hippokampe/api/holberton"
 )
 
 func Authorized(h *holberton.Holberton) gin.HandlerFunc {

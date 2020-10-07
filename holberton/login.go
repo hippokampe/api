@@ -2,9 +2,9 @@ package holberton
 
 import (
 	"github.com/gocolly/colly"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 	"github.com/mxschmitt/playwright-go"
-	"holberton/api/app/models"
-	"holberton/api/logger"
 )
 
 func (h *Holberton) login(email, password string) (*models.User, error) {
