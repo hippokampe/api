@@ -1,4 +1,4 @@
-module holberton/api
+module github.com/hippokampe/api
 
 go 1.14
 
@@ -18,7 +18,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mxschmitt/playwright-go v0.0.0-20200913203355-6b035002afc1
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
-	github.com/takama/daemon v1.0.0
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/ugorji/go v1.1.8 // indirect
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
