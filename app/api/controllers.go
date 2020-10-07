@@ -74,6 +74,7 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 		}
 
 		h.InternalStatus.Username = newUser.Username
+
 		ctx.JSON(http.StatusOK, gin.H{"username": newUser.Username})
 	}
 }
