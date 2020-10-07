@@ -34,6 +34,7 @@ type status struct {
 	Logged      bool
 	VisitedURLS map[string]bool
 	Started     bool
+	Username    string
 }
 
 func NewSession(browserName string) (*Holberton, error) {
@@ -42,7 +43,7 @@ func NewSession(browserName string) (*Holberton, error) {
 	holberton := &Holberton{}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless:       playwright.Bool(true),
+		Headless: playwright.Bool(true),
 	}
 
 	holberton.pw, err = playwright.Run()
