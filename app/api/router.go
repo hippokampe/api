@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"holberton/api/holberton"
+	"github.com/hippokampe/api/holberton"
 )
 
 func New(port string, holberton *holberton.Holberton) {
