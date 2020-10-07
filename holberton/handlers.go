@@ -1,8 +1,8 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 )
 
 func (h *Holberton) StartPage() error {
