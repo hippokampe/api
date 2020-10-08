@@ -80,6 +80,17 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 	}
 }
 
+func logout(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if err := h.Logout(); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"message": "Bye bye. See you soon"})
+	}
+}
+
 func status(h *holberton.Holberton) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{

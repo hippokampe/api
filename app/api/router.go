@@ -19,6 +19,7 @@ func New(holberton *holberton.Holberton, configParam *configuration.Configuratio
 	authorized := router.Group("/")
 	authorized.Use(Authorized(holberton))
 	{
+		authorized.POST("/logout", logout(holberton))
 		authorized.GET("/projects", getProjects(holberton))
 		authorized.GET("/projects/:id", getProject(holberton))
 		authorized.GET("/projects/:id/checker/:task", checkTask(holberton))

@@ -30,6 +30,10 @@ func (h *Holberton) Login(email, password string) (*models.User, error) {
 	return h.login(email, password)
 }
 
+func (h *Holberton) Logout() error {
+	return h.logout()
+}
+
 func (h *Holberton) GetProjects() (models.Projects, error) {
 	return h.projects()
 }
