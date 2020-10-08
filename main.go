@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	api.New(":5000", hbtn)
+	api.New(config.GetPort(), hbtn)
 
 	hbtn.CloseSession()
 }
