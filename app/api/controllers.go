@@ -82,10 +82,6 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 
 func status(h *holberton.Holberton) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		h.StartPage()
-
-		h.InternalStatus.Started = true
-
 		ctx.JSON(200, gin.H{
 			"status": "online",
 		})

@@ -3,12 +3,15 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hippokampe/api/holberton"
+	"github.com/hippokampe/configuration"
 )
 
-func New(port string, holberton *holberton.Holberton) {
+var config *configuration.Configuration
+
+func New(holberton *holberton.Holberton, configParam *configuration.Configuration) error {
 	router := gin.Default()
 
-	router.Use(StatusApp(holberton))
+	config = configParam
 
 	router.GET("/status", status(holberton))
 	router.POST("/login", login(holberton))
@@ -20,6 +23,24 @@ func New(port string, holberton *holberton.Holberton) {
 		authorized.GET("/projects/:id", getProject(holberton))
 		authorized.GET("/projects/:id/checker/:task", checkTask(holberton))
 	}
+	
+	if err := restoreSession(holberton); err != nil {
+		return err
+	}
+	
+	return router.Run(config.GetPort())
+}
 
-	router.Run(port)
+func restoreSession(holberton *holberton.Holberton) error {
+	if err := holberton.StartPage(); err != nil {
+		return err
+	}
+	
+	if config.InternalStatus.Logged {
+		email := config.InternalStatus.Credentials.Email
+		password := config.InternalStatus.Credentials.Password
+		_, _ = holberton.Login(email, password)
+	}
+
+	return nil
 }

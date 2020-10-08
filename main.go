@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/hippokampe/configuration"
 	"os"
+
+	"github.com/hippokampe/configuration"
 
 	"github.com/hippokampe/api/app/api"
 	"github.com/hippokampe/api/holberton"
@@ -16,7 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	hbtn, err := holberton.NewSession(holberton.FIREFOX, config)
+	hbtn, err := holberton.NewSession(config.BrowserSelected, config)
 	if err != nil {
 		logger.Log2(err, "could not create the session")
 
@@ -26,7 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	api.New(config.GetPort(), hbtn)
+	api.New(hbtn, config)
 
 	hbtn.CloseSession()
 }
