@@ -32,7 +32,10 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 		return nil, err
 	}
 
-	err = h.page.Click("#new_user > div.actions > input")
+	err = h.page.Click("#new_user > div.actions > input", playwright.PageClickOptions{
+		Timeout: playwright.Int(1000 * 5),
+	})
+
 	if err != nil {
 		logger.Log2(err, "could not sent the information")
 		return nil, err
@@ -66,7 +69,9 @@ func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, 
 		exists = true
 	})
 
-	h.collector.Visit(url)
+	if err := h.collector.Visit(url); err != nil {
+		return false, err
+	}
 
 	return exists, nil
 }

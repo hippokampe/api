@@ -1,8 +1,10 @@
 package holberton
 
 import (
+	"errors"
 	"github.com/hippokampe/api/app/models"
 	"github.com/hippokampe/api/logger"
+	"strings"
 )
 
 func (h *Holberton) StartPage() error {
@@ -27,7 +29,16 @@ func (h *Holberton) StartPage() error {
 }
 
 func (h *Holberton) Login(email, password string) (*models.User, error) {
-	return h.login(email, password)
+	user, err := h.login(email, password)
+	if err != nil {
+		if strings.Contains(err.Error(), "waiting for selector \"#new_user > div.actions > input\"") {
+			err = errors.New("bad credentials")
+		}
+
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (h *Holberton) Logout() error {
