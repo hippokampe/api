@@ -1,6 +1,7 @@
 package holberton
 
 import (
+	"github.com/hippokampe/configuration"
 	"net/http"
 	"net/http/httptest"
 
@@ -38,18 +39,23 @@ type status struct {
 	Username    string
 }
 
-func NewSession(browserName string) (*Holberton, error) {
+func NewSession(browserName string, config *configuration.Configuration) (*Holberton, error) {
 	var err error
+
+	pathBrowser, err := config.GetPathBrowser(browserName)
+	if err != nil {
+		return nil, err
+	}
 
 	holberton := &Holberton{}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(true),
+		Headless:       playwright.Bool(true),
+		ExecutablePath: playwright.String(pathBrowser),
 	}
 
 	holberton.pw, err = playwright.Run()
 	if err != nil {
-		logger.Log2(err, "could not start playwright")
 		return nil, err
 	}
 
@@ -66,7 +72,6 @@ func NewSession(browserName string) (*Holberton, error) {
 	}
 
 	if err != nil {
-		logger.Log2(err, "could not launch browser")
 		return nil, err
 	}
 
