@@ -36,7 +36,7 @@ func (h *Holberton) projects() (models.Projects, error) {
 				code := project.Find("code")    // Project code or id
 				score := project.Find("strong") // Score of the project
 
-				projects.ProjectsDone = append(projects.ProjectsDone, models.Project{
+				projects.AllProjects = append(projects.AllProjects, models.Project{
 					Title:    name.Text(),
 					ID:       code.Text(),
 					Score:    score.Text(),
