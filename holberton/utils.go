@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"time"
 
@@ -84,4 +85,22 @@ func parseCheckTitle(title string) (string, bool) {
 	statusLiteral := cleanString(parts[1])
 
 	return typeCheck, statusLiteral == "success"
+}
+
+func getDeadline(deadlineInformation string) (int, string, int) {
+	//deadline for a second chance before 10/16 (in 7 days)
+	var finishDate string
+
+	period := 1
+	if strings.Contains(deadlineInformation, "second") {
+		period = 2
+	}
+
+	date := strings.SplitAfter(deadlineInformation, "before ") // 10/16 (in 7 days)
+	date = strings.Split(date[1], " ")
+
+	finishDate = date[0]                  // 10/16
+	remaining, _ := strconv.Atoi(date[2]) // 7 days
+
+	return period, finishDate, remaining
 }
