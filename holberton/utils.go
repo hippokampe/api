@@ -39,6 +39,14 @@ func searchTitleTask(task *goquery.Selection) (h4, span *goquery.Selection) {
 	return h4, span
 }
 
+func searchTaskDone(task *goquery.Selection) bool {
+	hbtn := task.Find("button.student_task_done.btn.btn-default")
+	classHbtn, _ := hbtn.Attr("class")
+	status := strings.SplitAfter(classHbtn, "default ")[1]
+
+	return status == "yes"
+}
+
 func parseTitleTask(h4, span *goquery.Selection) (title, class string) {
 	title = strings.Replace(h4.Text(), span.Text(), "", 1)
 	title = strings.Trim(title, "\t\n ")
