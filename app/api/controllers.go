@@ -10,6 +10,14 @@ import (
 
 func getProjects(h *holberton.Holberton) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if ctx.Query("current") == "true" {
+			projects, _ := h.GetCurrentProjects()
+			ctx.JSON(http.StatusOK, gin.H{
+				"current_projects": projects,
+			})
+			return
+		}
+
 		projects, _ := h.GetProjects()
 		ctx.JSON(http.StatusOK, projects)
 	}
