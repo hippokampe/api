@@ -52,6 +52,28 @@ func (h *Holberton) projects() (models.Projects, error) {
 	return projects, nil
 }
 
+func (h *Holberton) currentProjects()(models.CurrentProjects, error) {
+	var err error
+	var currentProjects models.CurrentProjects
+
+	_, err = h.page.Goto("https://intranet.hbtn.io/dashboards/my_current_projects")
+	if err != nil {
+		logger.Log2(err, "could not goto")
+		return models.CurrentProjects{}, err
+	}
+
+	html, _ := h.page.Content()
+	url := h.setHtml(html, "/projects")
+
+	h.collector.OnHTML("body > main > article", func(element *colly.HTMLElement) {
+		currentProjects = searchCurrentProjects(element)
+	})
+
+	_ = h.collector.Visit(url)
+
+	return currentProjects, nil
+}
+
 func searchCurrentProjects(html *colly.HTMLElement) models.CurrentProjects {
 	var currentProjects models.CurrentProjects
 	var secondDeadline []models.Project

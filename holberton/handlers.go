@@ -53,6 +53,10 @@ func (h *Holberton) GetProject(id string) (*models.Project, error) {
 	return h.project(id)
 }
 
+func (h *Holberton) GetCurrentProjects() (models.CurrentProjects, error) {
+	return h.currentProjects()
+}
+
 func (h *Holberton) CheckTask(id, taskId string) (*models.Task, error) {
 	return h.checkTask(id, taskId)
 }
