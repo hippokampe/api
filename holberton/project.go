@@ -1,6 +1,8 @@
 package holberton
 
 import (
+	"log"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/app/models"
@@ -39,6 +41,12 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		projectTitle := article.DOM.Find("h1.gap")
 		project.Title = projectTitle.Text()
 
+		taskPath, err := h.createDirTasks(project.Title)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
 		scoreSelector := "body > main > article > div.gap.clean.well > ul > li:nth-child(2) >" +
 			" ul > li:nth-child(3) > strong"
 		projectScore := article.DOM.Find(scoreSelector)
@@ -57,18 +65,26 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 			h4, span := searchTitleTask(task)
 			title, class := parseTitleTask(h4, span)
 			status := searchTaskDone(task)
+
+			taskDescription, err := h.generateTask(taskPath, title, task)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
 			project.Tasks = append(project.Tasks, models.Task{
-				ID:    taskID,
-				Title: title,
-				Type:  class,
-				Done:  status,
+				ID:              taskID,
+				Title:           title,
+				Type:            class,
+				Done:            status,
+				FileDescription: taskDescription,
 			})
 		})
 
 		visited = true
 	})
 
-	h.collector.Visit(url)
+	_ = h.collector.Visit(url)
 
 	if project.Title == "" {
 		return nil, nil
