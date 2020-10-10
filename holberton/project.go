@@ -110,11 +110,7 @@ func (h *Holberton) generateReadme(project *models.Project, selection *goquery.S
 
 	defer file.Close()
 
-	selection.Children().Find("a").Each(func(_ int, el *goquery.Selection) {
-		link, _ := el.Attr("href")
-		link = "https://intranet.hbtn.io" + link
-		el.SetAttr("href", link)
-	})
+	fixHolbertonLinks(selection)
 
 	converter := md.NewConverter("", true, nil)
 	markdown := converter.Convert(selection)
