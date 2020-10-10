@@ -1,12 +1,15 @@
 package holberton
 
 import (
-	"log"
-
+	"fmt"
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/app/models"
 	"github.com/hippokampe/api/logger"
+	"log"
+	"os"
+	"path/filepath"
 )
 
 func (h *Holberton) project(id string) (*models.Project, error) {
@@ -40,6 +43,11 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 
 		projectTitle := article.DOM.Find("h1.gap")
 		project.Title = projectTitle.Text()
+
+		_, err := h.generateReadme(project, article.DOM.Find("article"))
+		if err != nil {
+			log.Println(err)
+		}
 
 		taskPath, err := h.createDirTasks(project.Title)
 		if err != nil {
@@ -91,4 +99,42 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 	}
 
 	return project, nil
+}
+
+func (h *Holberton) generateReadme(project *models.Project, selection *goquery.Selection) (string, error) {
+	filename := filepath.Join("/home/davixcky", project.Title) + ".md"
+	file, err := os.Create(filename)
+	if err != nil {
+		return "", err
+	}
+
+	defer file.Close()
+
+	selection.Children().Find("a").Each(func(_ int, el *goquery.Selection) {
+		link, _ := el.Attr("href")
+		link = "https://intranet.hbtn.io" + link
+		el.SetAttr("href", link)
+	})
+
+	converter := md.NewConverter("", true, nil)
+	markdown := converter.Convert(selection)
+
+	// Writing title of the file (project title)
+	title := fmt.Sprintf("# %s\n", project.Title)
+	_, err = file.WriteString(title)
+	if err != nil {
+		return "", err
+	}
+
+	// Writing content of the project
+	_, err = file.WriteString(markdown)
+	if err != nil {
+		return "", err
+	}
+
+	if err := file.Sync(); err != nil {
+		return "", nil
+	}
+
+	return filename, nil
 }
