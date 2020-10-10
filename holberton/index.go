@@ -30,6 +30,7 @@ type Holberton struct {
 	collector      *colly.Collector
 	page           *playwright.Page
 	InternalStatus status
+	Configuration  *configuration.Configuration
 }
 
 type status struct {
@@ -47,7 +48,9 @@ func NewSession(browserName string, config *configuration.Configuration) (*Holbe
 		return nil, err
 	}
 
-	holberton := &Holberton{}
+	holberton := &Holberton{
+		Configuration: config,
+	}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
 		Headless:       playwright.Bool(true),
