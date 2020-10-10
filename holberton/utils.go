@@ -104,3 +104,11 @@ func getDeadline(deadlineInformation string) (int, string, int) {
 
 	return period, finishDate, remaining
 }
+
+func fixHolbertonLinks(basicSelection *goquery.Selection) {
+	basicSelection.Children().Find("a").Each(func(_ int, el *goquery.Selection) {
+		link, _ := el.Attr("href")
+		link = "https://intranet.hbtn.io" + link
+		el.SetAttr("href", link)
+	})
+}
