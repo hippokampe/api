@@ -24,6 +24,8 @@ func (h *Holberton) generateTask(taskPath, titleTask string, selection *goquery.
 
 	defer file.Close()
 
+	fixHolbertonLinks(selection)
+
 	converter := md.NewConverter("", true, nil)
 	markdown := converter.Convert(selection)
 
