@@ -102,7 +102,8 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 }
 
 func (h *Holberton) generateReadme(project *models.Project, selection *goquery.Selection) (string, error) {
-	filename := filepath.Join("/home/davixcky", project.Title) + ".md"
+	basicPath := h.Configuration.InternalStatus.ConfigurationFile
+	filename := filepath.Join(basicPath, "projects", project.Title, "basic_information.md")
 	file, err := os.Create(filename)
 	if err != nil {
 		return "", err
