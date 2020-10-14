@@ -52,7 +52,7 @@ func (h *Holberton) projects() (models.Projects, error) {
 	return projects, nil
 }
 
-func (h *Holberton) currentProjects()(models.CurrentProjects, error) {
+func (h *Holberton) currentProjects() (models.CurrentProjects, error) {
 	var err error
 	var currentProjects models.CurrentProjects
 
@@ -130,6 +130,6 @@ func searchCurrentProjects(html *colly.HTMLElement) models.CurrentProjects {
 	currentProjects.FirstDeadline = firstDeadline
 	currentProjects.SecondDeadline = secondDeadline
 	currentProjects.Total = len(firstDeadline) + len(secondDeadline)
-	
+
 	return currentProjects
 }
