@@ -47,7 +47,7 @@ func (h *Holberton) generateTask(taskPath, titleTask string, selection *goquery.
 
 func (h *Holberton) createDirTasks(titleProject string) (string, error) {
 	basicPath := os.Getenv("HIPPOKAMPE")
-	path := filepath.Join(basicPath, "tasks", titleProject)
+	path := filepath.Join(basicPath, "projects", titleProject)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		_ = os.MkdirAll(path, os.ModePerm)

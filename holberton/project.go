@@ -2,14 +2,15 @@ package holberton
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/app/models"
 	"github.com/hippokampe/api/logger"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 func (h *Holberton) project(id string) (*models.Project, error) {
@@ -44,15 +45,15 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		projectTitle := article.DOM.Find("h1.gap")
 		project.Title = projectTitle.Text()
 
-		_, err := h.generateReadme(project, article.DOM.Find("article"))
-		if err != nil {
-			log.Println(err)
-		}
-
 		taskPath, err := h.createDirTasks(project.Title)
 		if err != nil {
 			log.Fatal(err)
 			return
+		}
+
+		_, err = h.generateReadme(project, article.DOM.Find("article"))
+		if err != nil {
+			log.Println(err)
 		}
 
 		scoreSelector := "body > main > article > div.gap.clean.well > ul > li:nth-child(2) >" +
@@ -102,7 +103,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 }
 
 func (h *Holberton) generateReadme(project *models.Project, selection *goquery.Selection) (string, error) {
-	basicPath := h.Configuration.InternalStatus.ConfigurationFile
+	basicPath := os.Getenv("HIPPOKAMPE")
 	filename := filepath.Join(basicPath, "projects", project.Title, "basic_information.md")
 	file, err := os.Create(filename)
 	if err != nil {
