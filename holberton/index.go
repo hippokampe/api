@@ -1,7 +1,7 @@
 package holberton
 
 import (
-	"github.com/hippokampe/configuration"
+	"github.com/hippokampe/configuration/v2/configuration"
 	"net/http"
 	"net/http/httptest"
 
@@ -30,7 +30,7 @@ type Holberton struct {
 	collector      *colly.Collector
 	page           *playwright.Page
 	InternalStatus status
-	Configuration  *configuration.Configuration
+	Configuration  *configuration.InternalSettings
 }
 
 type status struct {
@@ -40,10 +40,10 @@ type status struct {
 	Username    string
 }
 
-func NewSession(browserName string, config *configuration.Configuration) (*Holberton, error) {
+func NewSession(browserName string, config *configuration.InternalSettings) (*Holberton, error) {
 	var err error
 
-	pathBrowser, err := config.GetPathBrowser(browserName)
+	pathBrowser, err := config.GetPathBrowser()
 	if err != nil {
 		return nil, err
 	}

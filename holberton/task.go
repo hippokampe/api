@@ -46,7 +46,7 @@ func (h *Holberton) generateTask(taskPath, titleTask string, selection *goquery.
 }
 
 func (h *Holberton) createDirTasks(titleProject string) (string, error) {
-	basicPath := h.Configuration.InternalStatus.ConfigurationFile
+	basicPath := os.Getenv("HIPPOKAMPE")
 	path := filepath.Join(basicPath, "tasks", titleProject)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
