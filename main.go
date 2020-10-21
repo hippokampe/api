@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
+	general "github.com/hippokampe/configuration/v2"
 	"github.com/hippokampe/configuration/v2/configuration"
 	"github.com/hippokampe/configuration/v2/credentials"
 
@@ -35,6 +39,24 @@ func browserSelector(browserPath string) string {
 }
 
 func init() {
+	fmt.Println("init")
+
+
+	gin.SetMode(gin.ReleaseMode)
+
+	generalConfig := general.New("/etc/hippokampe/general.json")
+	if err := generalConfig.ReadGeneralConfig(); err != nil {
+		log.Fatal("cannot read the /etc/hippokampe/general.json. Check the documentation")
+	}
+
+	if err := os.Setenv("HIPPOKAMPE_CONFIGURATION", generalConfig.CustomSettingsFilename); err != nil {
+		log.Fatal("cannot set the $HIPPOKAMPE_CONFIGURATION. Check the documentation")
+	}
+
+	if err := os.Setenv("HIPPOKAMPE_CREDENTIALS", generalConfig.CredentialsFilename); err != nil {
+		log.Fatal("cannot set the $HIPPOKAMPE_CREDENTIALS. Check the documentation")
+	}
+
 	config = configuration.New()
 	cred = credentials.New()
 
@@ -53,6 +75,9 @@ func init() {
 }
 
 func main() {
+	fmt.Println("main")
+
+
 	browserPath, _ := config.GetPathBrowser()
 	hbtn, err := holberton.NewSession(browserSelector(browserPath), config)
 	if err != nil {
