@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -39,9 +38,6 @@ func browserSelector(browserPath string) string {
 }
 
 func init() {
-	fmt.Println("init")
-
-
 	gin.SetMode(gin.ReleaseMode)
 
 	generalConfig := general.New("/etc/hippokampe/general.json")
@@ -75,9 +71,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println("main")
-
-
 	browserPath, _ := config.GetPathBrowser()
 	hbtn, err := holberton.NewSession(browserSelector(browserPath), config)
 	if err != nil {
