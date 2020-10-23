@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -51,6 +52,11 @@ func init() {
 
 	if err := os.Setenv("HIPPOKAMPE_CREDENTIALS", generalConfig.CredentialsFilename); err != nil {
 		log.Fatal("cannot set the $HIPPOKAMPE_CREDENTIALS. Check the documentation")
+	}
+
+	path, _ := filepath.Split(generalConfig.CustomSettingsFilename)
+	if err := os.Setenv("HIPPOKAMPE", path); err != nil {
+		log.Fatal("cannot se the $HIPPOKAMPE")
 	}
 
 	config = configuration.New()

@@ -2,11 +2,12 @@ package holberton
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
+	"os"
+	"os/user"
+	"path/filepath"
+	"strconv"
 )
 
 func (h *Holberton) generateTask(taskPath, titleTask string, selection *goquery.Selection) (string, error) {
@@ -52,6 +53,25 @@ func (h *Holberton) createDirTasks(titleProject string) (string, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		_ = os.MkdirAll(path, os.ModePerm)
 	}
+
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+
+	group, err := user.LookupGroup("hippokampe")
+	if err != nil {
+		return "", err
+	}
+
+	uid, _ := strconv.Atoi(usr.Uid)
+	gid, _ := strconv.Atoi(group.Gid)
+
+	if err := os.Chown(path, uid, gid); err != nil {
+		return "", err
+	}
+
+	fmt.Println(group.Name)
 
 	return path, nil
 }

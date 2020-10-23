@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -111,3 +114,27 @@ func fixHolbertonLinks(basicSelection *goquery.Selection) {
 		el.SetAttr("href", link)
 	})
 }
+
+func chownR(path string) error {
+	usr, err := user.Current()
+	if err != nil {
+		return err
+	}
+
+	group, err := user.LookupGroup("hippokampe")
+	if err != nil {
+		return err
+	}
+
+	uid, _ := strconv.Atoi(usr.Uid)
+	gid, _ := strconv.Atoi(group.Gid)
+
+	return filepath.Walk(path, func(name string, info os.FileInfo, err error) error {
+		if err == nil {
+			err = os.Chown(name, uid, gid)
+			_ = os.Chmod(name, 0770)
+		}
+		return err
+	})
+}
+
