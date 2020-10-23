@@ -134,5 +134,9 @@ func (h *Holberton) generateReadme(project *models.Project, selection *goquery.S
 		return "", nil
 	}
 
+	if err := chownR(filename); err != nil {
+		return "", err
+	}
+
 	return filename, nil
 }
