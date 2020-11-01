@@ -13,7 +13,7 @@ nfpms:
     replacements:
       amd64: x86_64
       386: i386
-    file_name_template: "{{ .ProjectName }}_{{ .Os }}{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     vendor: Hippokampe - Holberton
     homepage: https://hippokampe.wtf
     maintainer: davixcky <orozco.davidj02@gmail.com>
