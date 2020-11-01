@@ -25,6 +25,8 @@ nfpms:
 
     dependencies:
       - npm
+      - ffmpeg
+      - libnss3
 
     epoch: 1
     release: 1
