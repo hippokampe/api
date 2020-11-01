@@ -1,8 +1,10 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
+	"errors"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
+	"strings"
 )
 
 func (h *Holberton) StartPage() error {
@@ -19,11 +21,28 @@ func (h *Holberton) StartPage() error {
 	}
 
 	h.newServer()
+
+	h.InternalStatus.VisitedURLS = make(map[string]bool)
+	h.InternalStatus.Logged = false
+
 	return nil
 }
 
 func (h *Holberton) Login(email, password string) (*models.User, error) {
-	return h.login(email, password)
+	user, err := h.login(email, password)
+	if err != nil {
+		if strings.Contains(err.Error(), "waiting for selector \"#new_user > div.actions > input\"") {
+			err = errors.New("bad credentials")
+		}
+
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (h *Holberton) Logout() error {
+	return h.logout()
 }
 
 func (h *Holberton) GetProjects() (models.Projects, error) {
@@ -34,6 +53,10 @@ func (h *Holberton) GetProject(id string) (*models.Project, error) {
 	return h.project(id)
 }
 
-func (h *Holberton) CheckTask(id, taskId string) error {
+func (h *Holberton) GetCurrentProjects() (models.CurrentProjects, error) {
+	return h.currentProjects()
+}
+
+func (h *Holberton) CheckTask(id, taskId string) (*models.Task, error) {
 	return h.checkTask(id, taskId)
 }
