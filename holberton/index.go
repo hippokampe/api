@@ -44,18 +44,12 @@ type status struct {
 func NewSession(browserName string, config *configuration.InternalSettings) (*Holberton, error) {
 	var err error
 
-	pathBrowser, err := config.GetPathBrowser()
-	if err != nil {
-		return nil, err
-	}
-
 	holberton := &Holberton{
 		Configuration: config,
 	}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless:       playwright.Bool(true),
-		ExecutablePath: playwright.String(pathBrowser),
+		Headless: playwright.Bool(true),
 	}
 
 	holberton.pw, err = playwright.Run()
