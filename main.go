@@ -28,7 +28,7 @@ func browserSelector(browserPath string) string {
 	}
 
 	if strings.Contains(browserPath, "chromium") {
-		return holberton.CHROMIUN
+		return holberton.CHROMIUM
 	}
 
 	if strings.Contains(browserPath, "webkit") {

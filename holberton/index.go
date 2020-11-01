@@ -1,9 +1,10 @@
 package holberton
 
 import (
-	"github.com/hippokampe/configuration/v2/configuration"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/hippokampe/configuration/v2/configuration"
 
 	"github.com/hippokampe/api/logger"
 
@@ -14,7 +15,7 @@ import (
 
 const (
 	FIREFOX  = "firefox"
-	CHROMIUN = "chromiun"
+	CHROMIUM = "chromium"
 	WEBKIT   = "webkit"
 )
 
@@ -66,7 +67,7 @@ func NewSession(browserName string, config *configuration.InternalSettings) (*Ho
 	switch browserName {
 	case FIREFOX:
 		holberton.browser, err = holberton.pw.Firefox.Launch(browserOptions)
-	case CHROMIUN:
+	case CHROMIUM:
 		holberton.browser, err = holberton.pw.Chromium.Launch(browserOptions)
 	case WEBKIT:
 		holberton.browser, err = holberton.pw.WebKit.Launch(browserOptions)
