@@ -1,9 +1,10 @@
 package holberton
 
 import (
-	"github.com/hippokampe/configuration/v2/configuration"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/hippokampe/configuration/v2/configuration"
 
 	"github.com/hippokampe/api/logger"
 
@@ -14,7 +15,7 @@ import (
 
 const (
 	FIREFOX  = "firefox"
-	CHROMIUN = "chromiun"
+	CHROMIUM = "chromium"
 	WEBKIT   = "webkit"
 )
 
@@ -43,18 +44,12 @@ type status struct {
 func NewSession(browserName string, config *configuration.InternalSettings) (*Holberton, error) {
 	var err error
 
-	pathBrowser, err := config.GetPathBrowser()
-	if err != nil {
-		return nil, err
-	}
-
 	holberton := &Holberton{
 		Configuration: config,
 	}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless:       playwright.Bool(true),
-		ExecutablePath: playwright.String(pathBrowser),
+		Headless: playwright.Bool(true),
 	}
 
 	holberton.pw, err = playwright.Run()
@@ -66,7 +61,7 @@ func NewSession(browserName string, config *configuration.InternalSettings) (*Ho
 	switch browserName {
 	case FIREFOX:
 		holberton.browser, err = holberton.pw.Firefox.Launch(browserOptions)
-	case CHROMIUN:
+	case CHROMIUM:
 		holberton.browser, err = holberton.pw.Chromium.Launch(browserOptions)
 	case WEBKIT:
 		holberton.browser, err = holberton.pw.WebKit.Launch(browserOptions)
