@@ -1,0 +1,40 @@
+project_name: api
+before:
+  hooks:
+    - go mod download
+    - go generate ./...
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+nfpms:
+  -
+    replacements:
+      amd64: x86_64
+      386: i386
+    file_name_template: "{{ .ProjectName }}_{{ .Os }}{{ .Arch }}"
+    vendor: Hippokampe - Holberton
+    homepage: https://hippokampe.wtf
+    maintainer: davixcky <orozco.davidj02@gmail.com>
+    description: Unnoficial holberton api.
+    license: Apache 2.0
+    formats:
+      - deb
+      - rpm
+
+    dependencies:
+      - npm
+
+    epoch: 1
+    release: 1
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
