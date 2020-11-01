@@ -1,17 +1,21 @@
 package holberton
 
 import (
-	"github.com/gocolly/colly"
-	"holberton/api/logger"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/hippokampe/configuration/v2/configuration"
+
+	"github.com/hippokampe/api/logger"
+
+	"github.com/gocolly/colly"
 
 	"github.com/mxschmitt/playwright-go"
 )
 
 const (
 	FIREFOX  = "firefox"
-	CHROMIUN = "chromiun"
+	CHROMIUM = "chromium"
 	WEBKIT   = "webkit"
 )
 
@@ -20,27 +24,36 @@ const (
 )
 
 type Holberton struct {
-	pw        *playwright.Playwright
-	browser   *playwright.Browser
-	ts        *httptest.Server
-	mux       *http.ServeMux
-	collector *colly.Collector
-	page      *playwright.Page
+	pw             *playwright.Playwright
+	browser        *playwright.Browser
+	ts             *httptest.Server
+	mux            *http.ServeMux
+	collector      *colly.Collector
+	page           *playwright.Page
+	InternalStatus status
+	Configuration  *configuration.InternalSettings
 }
 
-func NewSession(browserName string) (*Holberton, error) {
+type status struct {
+	Logged      bool
+	VisitedURLS map[string]bool
+	Started     bool
+	Username    string
+}
+
+func NewSession(browserName string, config *configuration.InternalSettings) (*Holberton, error) {
 	var err error
 
-	holberton := &Holberton{}
+	holberton := &Holberton{
+		Configuration: config,
+	}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless:       playwright.Bool(true),
-		ExecutablePath: playwright.String("/home/davixcky/.config/hbtn/firefox-1173/firefox/firefox"),
+		Headless: playwright.Bool(true),
 	}
 
 	holberton.pw, err = playwright.Run()
 	if err != nil {
-		logger.Log2(err, "could not start playwright")
 		return nil, err
 	}
 
@@ -48,7 +61,7 @@ func NewSession(browserName string) (*Holberton, error) {
 	switch browserName {
 	case FIREFOX:
 		holberton.browser, err = holberton.pw.Firefox.Launch(browserOptions)
-	case CHROMIUN:
+	case CHROMIUM:
 		holberton.browser, err = holberton.pw.Chromium.Launch(browserOptions)
 	case WEBKIT:
 		holberton.browser, err = holberton.pw.WebKit.Launch(browserOptions)
@@ -57,7 +70,6 @@ func NewSession(browserName string) (*Holberton, error) {
 	}
 
 	if err != nil {
-		logger.Log2(err, "could not launch browser")
 		return nil, err
 	}
 

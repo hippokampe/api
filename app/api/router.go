@@ -1,61 +1,57 @@
 package api
 
 import (
-	"fmt"
-	"holberton/api/app/models"
-	"holberton/api/holberton"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/hippokampe/api/holberton"
+	"github.com/hippokampe/configuration/v2/configuration"
 )
 
-func New(port string, holberton holberton.Holberton) {
+var config *configuration.InternalSettings
+
+func New(holberton *holberton.Holberton, configParam *configuration.InternalSettings) error {
 	router := gin.Default()
 
-	router.GET("/status", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Alive",
-		})
-	})
+	config = configParam
 
-	router.POST("/login", func(c *gin.Context) {
-		var user models.User
+	router.GET("/status", status(holberton))
+	router.POST("/login", login(holberton))
 
-		fmt.Println("logging")
-		fmt.Println(c.Param("email"))
-		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+	authorized := router.Group("/")
+	authorized.Use(Authorized(holberton))
+	{
+		authorized.POST("/logout", logout(holberton))
+		authorized.GET("/projects", getProjects(holberton))
+		authorized.GET("/projects/:id", getProject(holberton))
+		authorized.GET("/projects/:id/checker/:task", checkTask(holberton))
+	}
+
+	if err := restoreSession(holberton); err != nil {
+		return err
+	}
+
+	return router.Run(config.GetPort())
+}
+
+func restoreSession(holberton *holberton.Holberton) error {
+	if err := holberton.StartPage(); err != nil {
+		return err
+	}
+
+	status, err := config.IsLogged()
+	if err != nil {
+		return err
+	}
+
+	if status {
+		cred, err := config.GetCredentials()
+		if err != nil {
+			return err
 		}
 
-		fmt.Println(user.Email)
+		email, _ := cred.GetValue("email")
+		password, _ := cred.GetValue("password")
+		_, _ = holberton.Login(email, password)
+	}
 
-		holberton.StartPage()
-		newUser, _ := holberton.Login(user.Email, user.Password)
-
-		c.JSON(http.StatusOK, gin.H{"username": newUser.Username})
-	})
-
-	router.GET("/projects", func(c *gin.Context) {
-		holberton.StartPage()
-		projects, _ := holberton.GetProjects()
-		c.JSON(http.StatusOK, projects)
-	})
-
-	router.GET("/projects/:id", func(c *gin.Context) {
-		id := c.Param("id")
-
-		project, _ := holberton.GetProject(id)
-
-		c.JSON(http.StatusOK, project)
-	})
-
-	router.GET("/projects/:id/checker/:task", func(c *gin.Context) {
-		id := c.Param("id")
-		taskID := c.Param("task")
-
-		holberton.CheckTask(id, taskID)
-	})
-
-	router.Run(port)
+	return nil
 }

@@ -1,11 +1,9 @@
 package holberton
 
 import (
-	"holberton/api/app/models"
-	"holberton/api/logger"
-	"strings"
-
 	"github.com/gocolly/colly"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/logger"
 	"github.com/mxschmitt/playwright-go"
 )
 
@@ -34,7 +32,10 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 		return nil, err
 	}
 
-	err = h.page.Click("#new_user > div.actions > input")
+	err = h.page.Click("#new_user > div.actions > input", playwright.PageClickOptions{
+		Timeout: playwright.Int(1000 * 5),
+	})
+
 	if err != nil {
 		logger.Log2(err, "could not sent the information")
 		return nil, err
@@ -42,27 +43,35 @@ func (h *Holberton) login(email, password string) (*models.User, error) {
 
 	_, err = h.page.Goto("https://intranet.hbtn.io/users/my_profile")
 
-	h.userExists(h.page, user)
+	exists, err := h.userExists(h.page, user)
+	if err != nil {
+		logger.Log2(err, "cannot check if user exists")
+		return nil, err
+	}
 
-	return user, nil
+	if exists {
+		return user, err
+	}
+
+	return nil, nil
 }
 
 func (h *Holberton) userExists(page *playwright.Page, user *models.User) (bool, error) {
 	exists := false
 	html, _ := page.Content()
-	h.setHtml(html, "/login")
+	url := h.setHtml(html, "/login")
 
 	selector := "#user_preferred_name"
 	h.collector.OnHTML(selector, func(div *colly.HTMLElement) {
-		user.Username = strings.Trim(div.Attr("value"), "\t\n ")
+		user.Username = cleanString(div.Attr("value"))
+
+		h.InternalStatus.Logged = true
 		exists = true
 	})
 
-	h.collector.Visit(h.ts.URL + "/login")
-
-	if !exists {
-		return exists, logger.New("bad credentials")
+	if err := h.collector.Visit(url); err != nil {
+		return false, err
 	}
 
-	return true, nil
+	return exists, nil
 }
