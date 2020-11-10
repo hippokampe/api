@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
@@ -45,7 +46,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		projectTitle := article.DOM.Find("h1.gap")
 		project.Title = projectTitle.Text()
 
-		taskPath, err := h.createDirTasks(project.Title)
+		taskPath, err := h.createDirTasks(project.ID)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -61,21 +62,24 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 		projectScore := article.DOM.Find(scoreSelector)
 		project.Score = projectScore.Text()
 
+		taskIndex := 0 // Task index
+
 		tasksContainerSelector := "body > main > article > section"
 		tasksContainer := article.DOM.Find(tasksContainerSelector)
-		tasksContainer.Children().Each(func(i int, task *goquery.Selection) {
-			if task.Is("div.quiz_question_item_container") {
+		tasksContainer.Children().Each(func(_ int, taskSelector *goquery.Selection) {
+			if taskSelector.Is("div.quiz_question_item_container") {
 				return
 			}
 
-			value, _ := task.Attr("data-role")
+			value, _ := taskSelector.Attr("data-role")
 			taskID := value[4:]
 
-			h4, span := searchTitleTask(task)
+			h4, span := searchTitleTask(taskSelector)
 			title, class := parseTitleTask(h4, span)
-			status := searchTaskDone(task)
+			status := searchTaskDone(taskSelector)
 
-			taskDescription, err := h.generateTask(taskPath, title, task)
+			index := strconv.Itoa(taskIndex)
+			taskDescription, err := h.generateTask(taskPath, index, title, taskSelector)
 			if err != nil {
 				log.Println(err)
 				return
@@ -88,6 +92,8 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 				Done:            status,
 				FileDescription: taskDescription,
 			})
+
+			taskIndex++
 		})
 
 		visited = true
@@ -104,7 +110,7 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 
 func (h *Holberton) generateReadme(project *models.Project, selection *goquery.Selection) (string, error) {
 	basicPath := os.Getenv("HIPPOKAMPE")
-	filename := filepath.Join(basicPath, "projects", project.Title, "basic_information.md")
+	filename := filepath.Join(basicPath, "projects", project.ID, "basic_information.md")
 	file, err := os.Create(filename)
 	if err != nil {
 		return "", err

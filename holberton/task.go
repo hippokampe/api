@@ -10,14 +10,14 @@ import (
 	"strconv"
 )
 
-func (h *Holberton) generateTask(taskPath, titleTask string, selection *goquery.Selection) (string, error) {
+func (h *Holberton) generateTask(taskPath, taskFilename, titleTask string, selection *goquery.Selection) (string, error) {
 	// Cleaning html
 	selection.Find("div.task_progress_score_bar").Remove()
 	selection.Find("div.student_task_controls").Remove()
 	selection.Find("div.student_correction_requests").Remove()
 	selection.Find("h4.task").Remove()
 
-	filename := filepath.Join(taskPath, titleTask) + ".md"
+	filename := filepath.Join(taskPath, taskFilename) + ".md"
 	file, err := os.Create(filename)
 	if err != nil {
 		return "", err
