@@ -8,6 +8,7 @@ require (
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/antchfx/htmlquery v1.2.3 // indirect
 	github.com/antchfx/xmlquery v1.3.2 // indirect
+	github.com/blevesearch/bleve v1.0.14
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
