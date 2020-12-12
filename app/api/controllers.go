@@ -19,7 +19,14 @@ func getProjects(h *holberton.Holberton) gin.HandlerFunc {
 		}
 
 		projects, _ := h.GetProjects()
+
 		ctx.JSON(http.StatusOK, projects)
+		if err := searcher.IndexProjects(projects.AllProjects); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
 	}
 }
 
@@ -36,6 +43,30 @@ func getProject(h *holberton.Holberton) gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, project)
+	}
+}
+
+func searchProject(h *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		projectTitle, existsQuery := ctx.GetQuery("title")
+		if !existsQuery || len(projectTitle) == 0 {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "project title needs to be set",
+			})
+			return
+		}
+
+		id, err := searcher.GetProjectID(projectTitle)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"project_id": id,
+		})
 	}
 }
 
