@@ -85,6 +85,47 @@ func (s *Search) GetProjectID(query string) (string, error) {
 	return searchResult.Hits[0].ID, nil
 }
 
+func (s *Search) GetProjects(query string, limit int) (models.ProjectsResultSearch, error) {
+	if _, err := os.Stat(s.filename); os.IsNotExist(err) {
+		return models.ProjectsResultSearch{}, errors.New("you need to index first in order to create the mapping")
+	}
+
+	queryArray := strings.Split(query, "_")
+	query = strings.Join(queryArray, " ")
+
+	index, err := bleve.Open(s.filename)
+	if err != nil {
+		return models.ProjectsResultSearch{}, err
+	}
+
+	queryString := bleve.NewQueryStringQuery(query)
+	searchRequest := bleve.NewSearchRequest(queryString)
+	searchResult, err := index.Search(searchRequest)
+
+	defer index.Close()
+	if err != nil {
+		return models.ProjectsResultSearch{}, err
+	}
+
+	if searchResult.Total == 0 {
+		return models.ProjectsResultSearch{}, nil
+	}
+
+	var projects []models.ProjectSearch
+	for idx, hit := range searchResult.Hits {
+		projects = append(projects, models.ProjectSearch{
+			ID:    hit.ID,
+			Score: hit.Score,
+		})
+
+		if idx + 1 == limit {
+			break
+		}
+	}
+
+	return models.ProjectsResultSearch{Query: query, Results: projects}, nil
+}
+
 func generateName() string {
 	return "/" + time.Now().Format("2006_01_02")
 }

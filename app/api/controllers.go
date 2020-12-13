@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hippokampe/api/app/models"
@@ -48,6 +49,15 @@ func getProject(h *holberton.Holberton) gin.HandlerFunc {
 
 func searchProject(h *holberton.Holberton) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		limitQuery := ctx.DefaultQuery("limit", "1")
+		limit, err := strconv.Atoi(limitQuery)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		projectTitle, existsQuery := ctx.GetQuery("title")
 		if !existsQuery || len(projectTitle) == 0 {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -56,17 +66,37 @@ func searchProject(h *holberton.Holberton) gin.HandlerFunc {
 			return
 		}
 
-		id, err := searcher.GetProjectID(projectTitle)
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
+		if limit <= 0 {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "limit must be greater than 0",
 			})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{
-			"project_id": id,
-		})
+		if limit == 1 {
+			id, err := searcher.GetProjectID(projectTitle)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			ctx.JSON(http.StatusOK, gin.H{
+				"project_id": id,
+			})
+		} else {
+			results, err := searcher.GetProjects(projectTitle, limit)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			ctx.JSON(http.StatusOK, results)
+		}
+
 	}
 }
 
