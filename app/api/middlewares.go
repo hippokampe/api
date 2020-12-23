@@ -19,18 +19,3 @@ func Authorized(h *holberton.Holberton) gin.HandlerFunc {
 	}
 }
 
-func StatusApp(h *holberton.Holberton) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		if h.InternalStatus.Started {
-			return
-		}
-
-		if ctx.FullPath() == "/status" {
-			return
-		}
-
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "scrapper has not started. Check documentation",
-		})
-	}
-}

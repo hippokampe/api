@@ -143,6 +143,13 @@ func login(h *holberton.Holberton) gin.HandlerFunc {
 			return
 		}
 
+		if _, err := config.SetLogged(); err != nil{
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		h.InternalStatus.Username = newUser.Username
 
 		ctx.JSON(http.StatusOK, gin.H{"username": newUser.Username})
