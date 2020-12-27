@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
@@ -45,6 +46,8 @@ func (h *Holberton) project(id string) (*models.Project, error) {
 
 		projectTitle := article.DOM.Find("h1.gap")
 		project.Title = projectTitle.Text()
+
+		fmt.Println(h.findHeaderFile(article.DOM.Find("article#description")))
 
 		taskPath, err := h.createDirTasks(project.ID)
 		if err != nil {
@@ -145,4 +148,9 @@ func (h *Holberton) generateReadme(project *models.Project, selection *goquery.S
 	}
 
 	return filename, nil
+}
+
+func (h *Holberton) findHeaderFile(description *goquery.Selection) bool {
+	html, _ := description.Html()
+	return strings.Contains(html, "holberton.h")
 }
