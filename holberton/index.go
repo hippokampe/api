@@ -25,11 +25,11 @@ const (
 
 type Holberton struct {
 	pw             *playwright.Playwright
-	browser        *playwright.Browser
+	browser        playwright.Browser
 	ts             *httptest.Server
 	mux            *http.ServeMux
 	collector      *colly.Collector
-	page           *playwright.Page
+	page           playwright.Page
 	InternalStatus status
 	Configuration  *configuration.InternalSettings
 }
