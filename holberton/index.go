@@ -19,7 +19,7 @@ func New() (*Holberton, error) {
 	}
 
 	browserOptions := playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false),
+		Headless: playwright.Bool(true),
 	}
 
 	hbtn.browser, err = hbtn.pw.Firefox.Launch(browserOptions)
