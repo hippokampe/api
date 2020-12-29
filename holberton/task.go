@@ -5,7 +5,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/models"
 	"github.com/hippokampe/api/utils"
 )
 

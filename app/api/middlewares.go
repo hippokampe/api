@@ -5,8 +5,8 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/hippokampe/api/app/models"
 	"github.com/hippokampe/api/holberton"
+	"github.com/hippokampe/api/models"
 )
 
 func JWTMiddleware(hbtn *holberton.Holberton) (*jwt.GinJWTMiddleware, error) {

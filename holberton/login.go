@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
-	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/models"
 	"github.com/mxschmitt/playwright-go"
 	"github.com/pkg/errors"
 )

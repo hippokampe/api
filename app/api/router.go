@@ -27,6 +27,8 @@ func New(hbtn *holberton.Holberton) error {
 
 		contextHandler.GET("/projects", getProjects(hbtn))
 		contextHandler.GET("/projects/:id", getProject(hbtn))
+
+		contextHandler.GET("/search", searchProject(hbtn))
 	}
 
 	return router.Run(":8080")

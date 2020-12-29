@@ -1,36 +1,37 @@
 package search
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/blevesearch/bleve"
-	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/models"
 )
 
 type Search struct {
 	filename string
 }
 
-func New(filename string) *Search {
-	path, _ := filepath.Split(filename)
-
+func New(path, filename string) *Search {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		_ = os.Mkdir(path, os.ModePerm)
 	}
 
 	current := generateName()
 	filename += current + ".bleve"
+	fullPath := filepath.Join(path, filename)
 
 	return &Search{
-		filename: filename,
+		filename: fullPath,
 	}
 }
 
 func (s *Search) IndexProjects(projects []models.Project) error {
+	scope := "indexing"
 	if _, err := os.Stat(s.filename); os.IsNotExist(err) {
 		mapping := bleve.NewIndexMapping()
 		index, err := bleve.New(s.filename, mapping)
@@ -42,11 +43,11 @@ func (s *Search) IndexProjects(projects []models.Project) error {
 
 		for _, project := range projects {
 			if err := batch.Index(project.ID, project); err != nil {
-				return err
+				return errors.Wrap(err, scope)
 			}
 
 			if err := index.Batch(batch); err != nil {
-				return err
+				return errors.Wrap(err, scope)
 			}
 		}
 
@@ -118,7 +119,7 @@ func (s *Search) GetProjects(query string, limit int) (models.ProjectsResultSear
 			Score: hit.Score,
 		})
 
-		if idx + 1 == limit {
+		if idx+1 == limit {
 			break
 		}
 	}
