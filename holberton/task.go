@@ -1,77 +1,51 @@
 package holberton
 
 import (
-	"fmt"
-	md "github.com/JohannesKaufmann/html-to-markdown"
+	"strings"
+
 	"github.com/PuerkitoBio/goquery"
-	"os"
-	"os/user"
-	"path/filepath"
-	"strconv"
+	"github.com/gocolly/colly"
+	"github.com/hippokampe/api/app/models"
+	"github.com/hippokampe/api/utils"
 )
 
-func (h *Holberton) generateTask(taskPath, taskFilename, titleTask string, selection *goquery.Selection) (string, error) {
-	// Cleaning html
-	selection.Find("div.task_progress_score_bar").Remove()
-	selection.Find("div.student_task_controls").Remove()
-	selection.Find("div.student_correction_requests").Remove()
-	selection.Find("h4.task").Remove()
+func (hbtn *Holberton) getTask(taskElement *colly.HTMLElement) models.TaskBasic {
+	var task models.TaskBasic
 
-	filename := filepath.Join(taskPath, taskFilename) + ".md"
-	file, err := os.Create(filename)
-	if err != nil {
-		return "", err
-	}
+	// Get the position respect the others tasks
+	taskPosition := utils.CleanString(taskElement.Attr("data-position"))
 
-	defer file.Close()
+	// Search the ID
+	idContainer := utils.CleanString(taskElement.Attr("data-role"))
+	taskID := strings.TrimPrefix(idContainer, "task")
 
-	fixHolbertonLinks(selection)
+	// Task name
+	taskTitle, taskType := parseTitleTask(taskElement.DOM)
 
-	converter := md.NewConverter("", true, nil)
-	markdown := converter.Convert(selection)
+	task.Position = taskPosition
+	task.ID = taskID
+	task.Title = taskTitle
+	task.Type = taskType
 
-	// Writing title of the file (task title)
-	title := fmt.Sprintf("# %s\n", titleTask)
-	_, err = file.WriteString(title)
-	if err != nil {
-		return "", err
-	}
-
-	// Writing content of the task
-	_, err = file.WriteString(markdown)
-	if err != nil {
-		return "", err
-	}
-
-	return filename, file.Sync()
+	return task
 }
 
-func (h *Holberton) createDirTasks(titleProject string) (string, error) {
-	basicPath := os.Getenv("HIPPOKAMPE")
-	path := filepath.Join(basicPath, "projects", titleProject)
+func parseTitleTask(taskElementDOM *goquery.Selection) (title, class string) {
+	h4 := taskElementDOM.Find("h4.task")
+	span := taskElementDOM.Find("h4 > span")
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		_ = os.MkdirAll(path, os.ModePerm)
+	title = strings.Replace(h4.Text(), span.Text(), "", 1)
+	title = utils.CleanString(title)
+	class = utils.CleanString(span.Text())
+
+	tmp := strings.SplitN(title, ".", 2)
+	if len(tmp) == 2 {
+		title = utils.CleanString(tmp[1])
 	}
 
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
+	if class[0] == '#' { //Ex, #advanced to advanced
+		class = class[1:]
 	}
 
-	group, err := user.LookupGroup("hippokampe")
-	if err != nil {
-		return "", err
-	}
-
-	uid, _ := strconv.Atoi(usr.Uid)
-	gid, _ := strconv.Atoi(group.Gid)
-
-	if err := os.Chown(path, uid, gid); err != nil {
-		return "", err
-	}
-
-	fmt.Println(group.Name)
-
-	return path, nil
+	return title, class
 }

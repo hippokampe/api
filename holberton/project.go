@@ -2,155 +2,65 @@ package holberton
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/app/models"
-	"github.com/hippokampe/api/logger"
+	"github.com/hippokampe/api/utils"
+	"github.com/mxschmitt/playwright-go"
+	"github.com/pkg/errors"
 )
 
-func (h *Holberton) project(id string) (*models.Project, error) {
-	var err error
+func (hbtn *Holberton) getProject(browserCtx playwright.BrowserContext, id string) (models.Project, error) {
+	scope := "project"
+	page := browserCtx.Pages()[0]
 
-	visited := false
-
-	project := &models.Project{
-		ID: id,
+	projectUrl := fmt.Sprintf("https://intranet.hbtn.io/projects/%s", id)
+	if _, err := page.Goto(projectUrl); err != nil {
+		return models.Project{}, errors.Wrap(err, scope)
 	}
 
-	localURL := "/project/" + id
-	projectURL := "https://intranet.hbtn.io/projects/" + id
-	_, err = h.page.Goto(projectURL)
+	html, err := page.Content()
 	if err != nil {
-		logger.Log2(err, "could not goto")
-		return nil, err
+		return models.Project{}, errors.Wrap(err, scope)
 	}
 
-	html, _ := h.page.Content()
-	url := h.setHtml(html, localURL)
+	var project models.Project
 
-	h.collector.OnHTML("article", func(article *colly.HTMLElement) {
-		if visited {
-			return
+	url := hbtn.setHtml(html)
+	hbtn.collector.OnHTML("main > article", func(article *colly.HTMLElement) {
+		titleSelector := "h1.gap"
+		categorySelector := "main > article > p.sm-gap"
+		scoreSelector := "div.gap.clean.well > ul > li:nth-child(2) > ul > li:nth-child(3) > strong"
+
+		titleElement := article.DOM.Find(titleSelector)
+		categoryElement := article.DOM.Find(categorySelector)
+		scoreElement := article.DOM.Find(scoreSelector)
+
+		// Calculating project score
+		projectScore := utils.CleanString(scoreElement.Text())
+		if projectScore == "" {
+			projectScore = "0%"
 		}
 
-		categoryP := article.DOM.Find("body > main > article > p.sm-gap")
-		categoryTitle := cleanString(categoryP.Text())
-		project.Category = categoryTitle
+		project.ID = id
+		project.Title = utils.CleanString(titleElement.Text())
+		project.Category = utils.CleanString(categoryElement.Text())
+		project.Score = projectScore
 
-		projectTitle := article.DOM.Find("h1.gap")
-		project.Title = projectTitle.Text()
-
-		fmt.Println(h.findHeaderFile(article.DOM.Find("article#description")))
-
-		taskPath, err := h.createDirTasks(project.ID)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-
-		_, err = h.generateReadme(project, article.DOM.Find("article"))
-		if err != nil {
-			log.Println(err)
-		}
-
-		scoreSelector := "body > main > article > div.gap.clean.well > ul > li:nth-child(2) >" +
-			" ul > li:nth-child(3) > strong"
-		projectScore := article.DOM.Find(scoreSelector)
-		project.Score = projectScore.Text()
-
-		taskIndex := 0 // Task index
-
-		tasksContainerSelector := "body > main > article > section"
-		tasksContainer := article.DOM.Find(tasksContainerSelector)
-		tasksContainer.Children().Each(func(_ int, taskSelector *goquery.Selection) {
-			if taskSelector.Is("div.quiz_question_item_container") {
-				return
+		// Iterating over the tasks
+		article.ForEach("section.formatted-content > div", func(_ int, taskElement *colly.HTMLElement) {
+			isTask := !strings.HasPrefix(taskElement.Attr("data-role"), "quiz_question")
+			if isTask {
+				task := hbtn.getTask(taskElement)
+				project.Tasks = append(project.Tasks, task)
 			}
-
-			value, _ := taskSelector.Attr("data-role")
-			taskID := value[4:]
-
-			h4, span := searchTitleTask(taskSelector)
-			title, class := parseTitleTask(h4, span)
-			status := searchTaskDone(taskSelector)
-
-			index := strconv.Itoa(taskIndex)
-			taskDescription, err := h.generateTask(taskPath, index, title, taskSelector)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			project.Tasks = append(project.Tasks, models.Task{
-				ID:              taskID,
-				Title:           title,
-				Type:            class,
-				Done:            status,
-				FileDescription: taskDescription,
-			})
-
-			taskIndex++
 		})
-
-		visited = true
 	})
 
-	_ = h.collector.Visit(url)
-
-	if project.Title == "" {
-		return nil, nil
+	if err := hbtn.collector.Visit(url); err != nil {
+		return models.Project{}, errors.Wrap(err, scope)
 	}
 
 	return project, nil
-}
-
-func (h *Holberton) generateReadme(project *models.Project, selection *goquery.Selection) (string, error) {
-	basicPath := os.Getenv("HIPPOKAMPE")
-	filename := filepath.Join(basicPath, "projects", project.ID, "basic_information.md")
-	file, err := os.Create(filename)
-	if err != nil {
-		return "", err
-	}
-
-	defer file.Close()
-
-	fixHolbertonLinks(selection)
-
-	converter := md.NewConverter("", true, nil)
-	markdown := converter.Convert(selection)
-
-	// Writing title of the file (project title)
-	title := fmt.Sprintf("# %s\n", project.Title)
-	_, err = file.WriteString(title)
-	if err != nil {
-		return "", err
-	}
-
-	// Writing content of the project
-	_, err = file.WriteString(markdown)
-	if err != nil {
-		return "", err
-	}
-
-	if err := file.Sync(); err != nil {
-		return "", nil
-	}
-
-	if err := chownR(filename); err != nil {
-		return "", err
-	}
-
-	return filename, nil
-}
-
-func (h *Holberton) findHeaderFile(description *goquery.Selection) bool {
-	html, _ := description.Html()
-	return strings.Contains(html, "holberton.h")
 }
