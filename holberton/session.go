@@ -12,6 +12,11 @@ func (hbtn *Holberton) newSession() (*holbertonSession, error) {
 	}, nil
 }
 
+func (hbtn *Holberton) IsLogged(email string) bool {
+	_, err := hbtn.getSession(email)
+	return err == nil
+}
+
 func (hbtn *Holberton) getSession(email string) (*holbertonSession, error) {
 	ctx, ok := hbtn.sessions[email]
 	if !ok {
