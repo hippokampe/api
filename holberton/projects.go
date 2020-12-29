@@ -1,42 +1,60 @@
 package holberton
 
 import (
+	"fmt"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/app/models"
-	"github.com/hippokampe/api/logger"
-	"sort"
-	"strings"
+	"github.com/hippokampe/api/utils"
+	"github.com/mxschmitt/playwright-go"
+	"github.com/pkg/errors"
 )
 
-func (h *Holberton) projects() (models.Projects, error) {
-	var err error
-	var projects models.Projects
-
-	_, err = h.page.Goto("https://intranet.hbtn.io/dashboards/my_current_projects")
+func (hbtn *Holberton) GetProjects(email string) (models.Projects, error) {
+	scope := "holberton"
+	ctx, err := hbtn.getSession(email)
 	if err != nil {
-		logger.Log2(err, "could not goto")
+		return models.Projects{}, errors.Wrap(err, scope)
+	}
+
+	projects, err := hbtn.getProjects(*ctx.BrowserContext)
+	if err != nil {
+		return models.Projects{}, errors.Wrap(err, scope)
+	}
+
+	return projects, nil
+}
+
+func (hbtn *Holberton) getProjects(browserCtx playwright.BrowserContext) (models.Projects, error) {
+	scope := "projects"
+	page := browserCtx.Pages()[0]
+
+	if _, err := page.Goto("https://intranet.hbtn.io/dashboards/my_current_projects"); err != nil {
+		return models.Projects{}, errors.Wrap(err, scope)
+	}
+
+	html, err := page.Content()
+	if err != nil {
 		return models.Projects{}, err
 	}
 
-	html, _ := h.page.Content()
-	url := h.setHtml(html, "/projects")
+	var projects models.Projects
 
-	h.collector.OnHTML("body > main > article", func(element *colly.HTMLElement) {
-		projects.CurrentProjects = searchCurrentProjects(element)
-
+	url := hbtn.setHtml(html)
+	hbtn.collector.OnHTML("main > article", func(articles *colly.HTMLElement) {
 		selector := "div.panel.panel-default"
-		element.ForEach(selector, func(_ int, e *colly.HTMLElement) {
-			h4 := e.DOM.Find("h4.panel-title")
-			title := cleanString(h4.Text())
+		articles.ForEach(selector, func(_ int, projectGroupsElement *colly.HTMLElement) {
+			h4 := projectGroupsElement.DOM.Find("h4.panel-title")
+			title := utils.CleanString(h4.Text())
 
-			projectsList := e.DOM.Find("li.list-group-item")
+			projectsList := projectGroupsElement.DOM.Find("li.list-group-item")
 			projectsList.Each(func(_ int, project *goquery.Selection) {
 				name := project.Find("a")       // Project title
 				code := project.Find("code")    // Project code or id
 				score := project.Find("strong") // Score of the project
 
-				projects.AllProjects = append(projects.AllProjects, models.Project{
+				projects = append(projects, models.Project{
 					Title:    name.Text(),
 					ID:       code.Text(),
 					Score:    score.Text(),
@@ -47,89 +65,47 @@ func (h *Holberton) projects() (models.Projects, error) {
 
 	})
 
-	_ = h.collector.Visit(url)
+	if err := hbtn.collector.Visit(url); err != nil {
+		return models.Projects{}, errors.Wrap(err, scope)
+	}
 
 	return projects, nil
 }
 
-func (h *Holberton) currentProjects() (models.CurrentProjects, error) {
-	var err error
-	var currentProjects models.CurrentProjects
+func (hbtn *Holberton) extractProject(browserCtx playwright.BrowserContext, projectUrl string) (models.Project, error) {
+	scope := "fill project"
+	page := browserCtx.Pages()[0]
 
-	_, err = h.page.Goto("https://intranet.hbtn.io/dashboards/my_current_projects")
+	_, err := page.Goto(projectUrl)
 	if err != nil {
-		logger.Log2(err, "could not goto")
-		return models.CurrentProjects{}, err
+		return models.Project{}, errors.Wrap(err, scope)
 	}
 
-	html, _ := h.page.Content()
-	url := h.setHtml(html, "/projects")
+	html, err := page.Content()
+	if err != nil {
+		return models.Project{}, errors.Wrap(err, scope)
+	}
 
-	h.collector.OnHTML("body > main > article", func(element *colly.HTMLElement) {
-		currentProjects = searchCurrentProjects(element)
+	url := hbtn.setHtml(html)
+	hbtn.collector.OnHTML("body > main:nth-child(3) > article:nth-child(3)", func(article *colly.HTMLElement) {
+		titleSelector := "body > main:nth-child(3) > article:nth-child(3) > h1"
+		categorySelector := "p.sm-gap:nth-child(4) > small:nth-child(1)"
+		weightSelector := "body > main:nth-child(3) > article:nth-child(3) > p:nth-child(6) > em:nth-child(1) > small:nth-child(1)"
+
+		title := article.DOM.Find(titleSelector)
+		category := article.DOM.Find(categorySelector)
+		weight := article.DOM.Find(weightSelector)
+
+		fmt.Println(title.Text())
+		fmt.Println(category.Text())
+		fmt.Println(weight.Text())
+
 	})
 
-	_ = h.collector.Visit(url)
+	err = hbtn.collector.Visit(url)
+	if err != nil {
+		return models.Project{}, errors.Wrap(err, scope)
+	}
 
-	return currentProjects, nil
-}
-
-func searchCurrentProjects(html *colly.HTMLElement) models.CurrentProjects {
-	var currentProjects models.CurrentProjects
-	var secondDeadline []models.Project
-	var firstDeadline []models.Project
-
-	selector := "ul.list-group:nth-child(2)"
-	selection := html.DOM.Find(selector)
-	list := selection.Children()
-	list.Each(func(_ int, selection *goquery.Selection) {
-		title := selection.Find("a")
-		category := selection.Find("em")
-		code := selection.Find("code")
-
-		scoreSelector := selection.Find("div.project_progress_percentage.alert.alert-info")
-		score := scoreSelector.Text()
-		score = cleanString(score)
-		score = strings.TrimSuffix(score, " done")
-
-		// Deadline summary
-		deadlineGeneral := selection.Find("span.bpi-status").Text()
-		information := strings.Split(deadlineGeneral, ", ")
-		period, finished, remaining := getDeadline(information[1])
-		startedTmp := strings.Split(deadlineGeneral, ",")[0]
-		started := strings.TrimPrefix(startedTmp, "started on ")
-
-		project := models.Project{
-			ID:       code.Text(),
-			Title:    title.Text(),
-			Score:    score,
-			Category: category.Text(),
-			DeadlineInformation: models.DeadlineSummary{
-				Period:        period,
-				Started:       started,
-				Finished:      finished,
-				RemainingDate: remaining,
-			},
-		}
-
-		if project.DeadlineInformation.Period == 1 {
-			firstDeadline = append(firstDeadline, project)
-		} else {
-			secondDeadline = append(secondDeadline, project)
-		}
-	})
-
-	sort.Slice(firstDeadline, func(i, j int) bool {
-		return firstDeadline[i].DeadlineInformation.RemainingDate < firstDeadline[j].DeadlineInformation.RemainingDate
-	})
-
-	sort.Slice(secondDeadline, func(i, j int) bool {
-		return secondDeadline[i].DeadlineInformation.RemainingDate < secondDeadline[j].DeadlineInformation.RemainingDate
-	})
-
-	currentProjects.FirstDeadline = firstDeadline
-	currentProjects.SecondDeadline = secondDeadline
-	currentProjects.Total = len(firstDeadline) + len(secondDeadline)
-
-	return currentProjects
+	return models.Project{}, nil
 }
