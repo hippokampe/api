@@ -24,7 +24,9 @@ func New(hbtn *holberton.Holberton) error {
 	contextHandler.Use(authMiddleware.MiddlewareFunc())
 	{
 		contextHandler.GET("/auth/refresh_token", authMiddleware.RefreshHandler)
+
 		contextHandler.GET("/projects", getProjects(hbtn))
+		contextHandler.GET("/projects/:id", getProject(hbtn))
 	}
 
 	return router.Run(":8080")
