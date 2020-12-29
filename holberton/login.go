@@ -9,29 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (hbtn *Holberton) Login(credentials models.Login) (models.User, error) {
-	scope := "holberton"
-
-	ctx, err := hbtn.getSession(credentials.Email)
-	if err == nil {
-		return *ctx.User, nil
-	}
-
-	ctx, err = hbtn.newSession()
-	if err != nil {
-		return models.User{}, errors.Wrap(err, scope)
-	}
-
-	user, err := hbtn.login(*ctx.BrowserContext, credentials)
-	if err != nil {
-		return models.User{}, errors.Wrap(err, scope)
-	}
-
-	ctx.User = &user
-	hbtn.addSession(user.Email, ctx)
-	return user, nil
-}
-
 func (hbtn *Holberton) login(browserCtx playwright.BrowserContext, credentials models.Login) (models.User, error) {
 	scope := "login"
 	page, err := browserCtx.NewPage()
