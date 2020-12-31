@@ -8,7 +8,7 @@ type Project struct {
 	Title    string     `json:"title"`
 	Category string     `json:"category"`
 	Score    string     `json:"score"`
-	Tasks    TasksBasic `json:"tasks"`
+	Tasks    TasksBasic `json:"tasks,omitempty"`
 }
 
 func (p Project) Exists() bool {
