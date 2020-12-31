@@ -1,6 +1,8 @@
 package holberton
 
 import (
+	"strconv"
+
 	"github.com/hippokampe/api/components/search"
 	"github.com/hippokampe/api/models"
 	"github.com/pkg/errors"
@@ -20,6 +22,7 @@ func (hbtn *Holberton) Login(credentials models.Login) (models.User, error) {
 
 	user, err := hbtn.login(*ctx.BrowserContext, credentials)
 	if err != nil {
+		_ = (*ctx.BrowserContext).Close()
 		return models.User{}, errors.Wrap(err, scope)
 	}
 
@@ -79,4 +82,30 @@ func (hbtn *Holberton) SearchByTitle(email, title string, limit int) (interface{
 	}
 
 	return ctx.Searcher.GetProjects(title, limit)
+}
+
+func (hbtn *Holberton) Checker(email, projectID, valueTask string, checkByIndex bool) (models.TaskChecker, error) {
+	scope := "holberton"
+	ctx, err := hbtn.getSession(email)
+	if err != nil {
+		return models.TaskChecker{}, errors.Wrap(err, scope)
+	}
+
+	valInt, err := strconv.Atoi(valueTask)
+	if err != nil {
+		return models.TaskChecker{}, errors.Wrap(ErrType, scope)
+	}
+
+	var task models.TaskChecker
+	if checkByIndex {
+		task, err = hbtn.checkByIndex(*ctx.BrowserContext, projectID, valInt)
+	} else {
+		task, err = hbtn.checkByTaskID(*ctx.BrowserContext, projectID, valueTask)
+	}
+
+	if err != nil {
+		return models.TaskChecker{}, errors.Wrap(err, scope)
+	}
+
+	return task, nil
 }
