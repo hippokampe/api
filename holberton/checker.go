@@ -14,7 +14,12 @@ import (
 
 func (hbtn *Holberton) checkByTaskID(browserCtx playwright.BrowserContext, projectID, taskID string) (models.TaskChecker, error) {
 	scope := "checker by task id"
-	page := browserCtx.Pages()[0]
+	page, err := browserCtx.NewPage()
+	if err != nil {
+		return models.TaskChecker{}, errors.Wrap(err, scope)
+	}
+
+	defer page.Close()
 
 	projectUrl := fmt.Sprintf("https://intranet.hbtn.io/projects/%s", projectID)
 	if _, err := page.Goto(projectUrl); err != nil {
@@ -76,7 +81,12 @@ func (hbtn *Holberton) checkByTaskID(browserCtx playwright.BrowserContext, proje
 
 func (hbtn *Holberton) checkByIndex(browserCtx playwright.BrowserContext, projectID string, taskIndex int) (models.TaskChecker, error) {
 	scope := "checker by index"
-	page := browserCtx.Pages()[0]
+	page, err := browserCtx.NewPage()
+	if err != nil {
+		return models.TaskChecker{}, errors.Wrap(err, scope)
+	}
+
+	defer page.Close()
 
 	visited := false
 	found := false

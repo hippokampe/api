@@ -13,7 +13,12 @@ import (
 
 func (hbtn *Holberton) getProject(browserCtx playwright.BrowserContext, id string) (models.Project, error) {
 	scope := "project"
-	page := browserCtx.Pages()[0]
+	page, err := browserCtx.NewPage()
+	if err != nil {
+		return models.Project{}, errors.Wrap(err, scope)
+	}
+
+	defer page.Close()
 
 	projectUrl := fmt.Sprintf("https://intranet.hbtn.io/projects/%s", id)
 	if _, err := page.Goto(projectUrl); err != nil {
