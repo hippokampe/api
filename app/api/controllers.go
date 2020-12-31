@@ -221,3 +221,26 @@ func searchProject(hbtn *holberton.Holberton) gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, resultSearch)
 	}
 }
+
+func logout(hbtn *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email, err := getEmailFromJWT(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "type email it's not the expected",
+			})
+			return
+		}
+
+		if hbtn.Logout(email) != nil {
+			ctx.JSON(http.StatusForbidden, gin.H{
+				"message": holberton.ErrSessionNotExists.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "session closed. See you soon",
+		})
+	}
+}

@@ -32,6 +32,17 @@ func (hbtn *Holberton) Login(credentials models.Login) (models.User, error) {
 	return user, nil
 }
 
+func (hbtn *Holberton) Logout(email string) error {
+	scope := "holberton"
+
+	if hbtn.IsLogged(email) {
+		hbtn.deleteSession(email)
+		return nil
+	}
+
+	return errors.Wrap(ErrSessionNotExists, scope)
+}
+
 func (hbtn *Holberton) GetProjects(email string) (models.Projects, error) {
 	scope := "holberton"
 	ctx, err := hbtn.getSession(email)

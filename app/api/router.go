@@ -27,12 +27,13 @@ func New(hbtn *holberton.Holberton) error {
 	contextHandler.Use(authMiddleware.MiddlewareFunc())
 	{
 		contextHandler.GET("/auth/refresh_token", authMiddleware.RefreshHandler)
+		contextHandler.POST("/auth/logout", logout(hbtn))
 
 		contextHandler.GET("/projects", getProjects(hbtn))
 		contextHandler.GET("/projects/:id", getProject(hbtn))
 
-		contextHandler.GET("/checker/:id/:task", checker(hbtn))
-		contextHandler.GET("/checker/:id", checker2(hbtn))
+		contextHandler.POST("/checker/:id/:task", checker(hbtn))
+		contextHandler.POST("/checker/:id", checker2(hbtn))
 
 		contextHandler.GET("/search", searchProject(hbtn))
 	}
