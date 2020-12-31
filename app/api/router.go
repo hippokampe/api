@@ -8,7 +8,10 @@ import (
 
 func New(hbtn *holberton.Holberton) error {
 	scope := "api: new"
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(Logger())
+	router.Use(gin.Recovery())
 
 	authMiddleware, err := JWTMiddleware(hbtn)
 	if err != nil {
