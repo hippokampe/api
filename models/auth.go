@@ -6,11 +6,11 @@ type Login struct {
 }
 
 type User struct {
-	ID         string
-	Email      string
-	UserName   string
-	FirstName  string
-	LastName   string
-	ProfileURL string
-	City       string
+	ID         string `json:"id"`
+	Email      string `json:"email"`
+	UserName   string `json:"user_name"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+	ProfileURL string `json:"profile_url"`
+	City       string `json:"city"`
 }
