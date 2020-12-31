@@ -52,7 +52,7 @@ func (hbtn *Holberton) getProject(browserCtx playwright.BrowserContext, id strin
 		article.ForEach("section.formatted-content > div", func(_ int, taskElement *colly.HTMLElement) {
 			isTask := !strings.HasPrefix(taskElement.Attr("data-role"), "quiz_question")
 			if isTask {
-				task := hbtn.getTask(taskElement)
+				task := hbtn.getTask(taskElement.DOM)
 				project.Tasks = append(project.Tasks, task)
 			}
 		})

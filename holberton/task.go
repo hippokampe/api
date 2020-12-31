@@ -4,23 +4,24 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
 	"github.com/hippokampe/api/models"
 	"github.com/hippokampe/api/utils"
 )
 
-func (hbtn *Holberton) getTask(taskElement *colly.HTMLElement) models.TaskBasic {
+func (hbtn *Holberton) getTask(taskElement *goquery.Selection) models.TaskBasic {
 	var task models.TaskBasic
 
 	// Get the position respect the others tasks
-	taskPosition := utils.CleanString(taskElement.Attr("data-position"))
+	val, _ := taskElement.Attr("data-position")
+	taskPosition := utils.CleanString(val)
 
 	// Search the ID
-	idContainer := utils.CleanString(taskElement.Attr("data-role"))
+	val, _ = taskElement.Attr("data-role")
+	idContainer := utils.CleanString(val)
 	taskID := strings.TrimPrefix(idContainer, "task")
 
 	// Task name
-	taskTitle, taskType := parseTitleTask(taskElement.DOM)
+	taskTitle, taskType := parseTitleTask(taskElement)
 
 	task.Position = taskPosition
 	task.ID = taskID

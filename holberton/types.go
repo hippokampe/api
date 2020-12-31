@@ -17,6 +17,8 @@ var (
 	ErrServeFile        = errors.New("invalid access from colly to html content")
 	ErrSessionNotExists = errors.New("session not found")
 	ErrLimitNotValid    = errors.New("limit needs to be greater than 1")
+	ErrTaskNotFound     = errors.New("task specified not found")
+	ErrType             = errors.New("type not valid")
 )
 
 type Holberton struct {
