@@ -50,17 +50,17 @@ func Logger() gin.HandlerFunc {
 		// Execution time
 		latency := end.Sub(start) // latency = end - start
 
-		path := c.Request.URL.Path
+		path := c.Request.URL
 
-		email := "unknown"
-
-		if emailTmp, err := getEmailFromJWT(c); err == nil {
+		email, _ := c.Get("holberton_email")                 // Get the email with login endpoint
+		if emailTmp, err := getEmailFromJWT(c); err == nil { // Get the email with the others endpoint
 			email = emailTmp
 		}
 
 		clientIP := c.ClientIP()
 		method := c.Request.Method
 		statusCode := c.Writer.Status()
+		end = end.UTC()
 
 		logClient.Infof("%s | %3d | %13v | %15s | %s  %s | +%v",
 			email,

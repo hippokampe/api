@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -19,6 +20,10 @@ func JWTMiddleware(hbtn *holberton.Holberton) (*jwt.GinJWTMiddleware, error) {
 		Timeout:          time.Hour,
 		MaxRefresh:       time.Hour,
 		IdentityKey:      "email",
+		SendCookie:       true,
+		SecureCookie:     false, //non HTTPS dev environments
+		CookieDomain:     "localhost:8080",
+		CookieName:       "token", // default jwt
 		Authenticator: func(ctx *gin.Context) (interface{}, error) {
 			return authenticator(hbtn, ctx)
 		},
@@ -40,7 +45,17 @@ func JWTMiddleware(hbtn *holberton.Holberton) (*jwt.GinJWTMiddleware, error) {
 				"message": message,
 			})
 		},
-		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
+		LoginResponse: func(ctx *gin.Context, i int, token string, t time.Time) {
+			val, _ := ctx.Get("holberton_user")
+			hbtnUser := val.(models.User)
+
+			ctx.JSON(http.StatusOK, gin.H{
+				"token":  token,
+				"expire": t.Format(time.RFC3339),
+				"user":   hbtnUser,
+			})
+		},
+		TokenLookup:   "header: Authorization, query: token, cookie: jwt, cookie: token",
 		TokenHeadName: "Bearer",
 		TimeFunc:      time.Now,
 	})
@@ -58,6 +73,9 @@ func authenticator(hbtn *holberton.Holberton, ctx *gin.Context) (interface{}, er
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
+
+	ctx.Set("holberton_user", user)
+	ctx.Set("holberton_email", user.Email)
 
 	return user, nil
 }
