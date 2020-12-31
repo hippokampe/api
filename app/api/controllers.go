@@ -4,11 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/hippokampe/api/models"
-	"github.com/pkg/errors"
-
 	"github.com/gin-gonic/gin"
 	"github.com/hippokampe/api/holberton"
+	"github.com/hippokampe/api/models"
+	"github.com/pkg/errors"
 )
 
 func getProjects(hbtn *holberton.Holberton) gin.HandlerFunc {
@@ -35,6 +34,98 @@ func getProjects(hbtn *holberton.Holberton) gin.HandlerFunc {
 			"total":    len(projects),
 		})
 
+	}
+}
+
+func checker(hbtn *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email, err := getEmailFromJWT(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "type email it's not the expected",
+			})
+			return
+		}
+
+		projectID := ctx.Param("id")
+		taskID := ctx.Param("task")
+
+		if len(projectID) != 3 || len(taskID) != 4 {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "the id submitted for the project or the task it's not valid",
+			})
+			return
+		}
+
+		taskChecker, err := hbtn.Checker(email, projectID, taskID, false)
+		if err != nil {
+			var errorMessage string
+			var errorCode int
+			switch errors.Cause(err) {
+			case holberton.ErrType:
+				errorMessage = holberton.ErrType.Error()
+				errorCode = http.StatusBadRequest
+			case holberton.ErrTaskNotFound:
+				errorMessage = holberton.ErrTaskNotFound.Error()
+				errorCode = http.StatusNotFound
+			default:
+				errorMessage = err.Error()
+				errorCode = http.StatusInternalServerError
+			}
+
+			ctx.JSON(errorCode, gin.H{
+				"message": errorMessage,
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, taskChecker)
+	}
+}
+
+func checker2(hbtn *holberton.Holberton) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email, err := getEmailFromJWT(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "type email it's not the expected",
+			})
+			return
+		}
+
+		projectID := ctx.Param("id")
+		taskPosition := ctx.Query("position")
+
+		if len(projectID) != 3 {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"message": "the id submitted for the project it's not valid",
+			})
+			return
+		}
+
+		taskChecker, err := hbtn.Checker(email, projectID, taskPosition, true)
+		if err != nil {
+			var errorMessage string
+			var errorCode int
+			switch errors.Cause(err) {
+			case holberton.ErrType:
+				errorMessage = holberton.ErrType.Error()
+				errorCode = http.StatusBadRequest
+			case holberton.ErrTaskNotFound:
+				errorMessage = holberton.ErrTaskNotFound.Error()
+				errorCode = http.StatusNotFound
+			default:
+				errorMessage = err.Error()
+				errorCode = http.StatusInternalServerError
+			}
+
+			ctx.JSON(errorCode, gin.H{
+				"message": errorMessage,
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, taskChecker)
 	}
 }
 
