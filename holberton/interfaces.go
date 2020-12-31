@@ -32,6 +32,19 @@ func (hbtn *Holberton) Login(credentials models.Login) (models.User, error) {
 	return user, nil
 }
 
+func (hbtn *Holberton) GetProfile(email string) (models.User, error) {
+	ctx, err := hbtn.getSession(email)
+	if err == nil {
+		return *ctx.User, nil
+	}
+
+	if ctx == nil {
+		return models.User{}, errors.Wrap(ErrSessionNotExists, "holberton")
+	}
+
+	return *ctx.User, nil
+}
+
 func (hbtn *Holberton) Logout(email string) error {
 	scope := "holberton"
 
