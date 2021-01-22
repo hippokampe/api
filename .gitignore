@@ -1,3 +1,7 @@
 .idea
 .ms-playwright
 /tmp
+api.log*
+keys
+data
+api
